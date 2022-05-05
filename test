@@ -10,7 +10,7 @@ if [ $? -eq 0 ]; then
     cd out
     echo running...
 
-    java -cp .:"lib/jsoup-1.14.3.jar":"lib/junit-4.11.jar" WikiGame $1 $2
+    java -cp .:"../lib/jsoup-1.14.3.jar":"../lib/junit-4.11.jar" Tester
 
     echo finished.
     cd ..
