@@ -1,6 +1,9 @@
 import java.util.HashMap;
 import java.util.Map;
-
+import java.util.Scanner;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 
 import org.junit.*;
@@ -29,6 +32,19 @@ public class Tester {
         for (var key : expectMap_searchToWikiURL.keySet()) {
             var actual = Utility.searchToWikiURL(key).toString().toLowerCase();
             assertEquals(expectMap_searchToWikiURL.getOrDefault(key, "null").toLowerCase(), actual);
+        }
+    }
+
+    @Test
+    public void testKevinBaconWikiHTML() {
+        try {
+            var actual = Utility.getWikiHTMLText(Utility.searchToWikiURL("Kevin Bacon"), 2000);
+            var pw = new PrintWriter(new File("../res/actual_kevin_bacon_wiki.html"));
+            pw.print(actual.toString());
+            pw.close();
+        } catch (IOException e) {
+            System.out.println("Exception occurred.");
+            assertTrue(false);
         }
     }
 }
