@@ -47,5 +47,18 @@ public class Tester {
             assertTrue(false);
         }
     }
+
+    @Test
+    public void testGetAllLinksOnPage() {
+        try {
+            var kevinBaconHTML = Utility.getWikiHTMLText(
+                Utility.searchToWikiURL("Kevin Bacon"), 2000
+            );
+            System.out.println(Utility.getAllWikiLinksOnPage(kevinBaconHTML));
+        } catch (IOException e) {
+            e.printStackTrace();
+            assertTrue(false);
+        }
+    }
 }
 

@@ -1,9 +1,15 @@
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Scanner;
 
 import java.net.*;
 import java.io.*;
+
+import org.jsoup.*;
+import org.jsoup.nodes.*;
+import org.jsoup.select.*;
 
 /**
  * Utility for the WikiGame application.
@@ -33,8 +39,9 @@ public /* static */ class Utility {
      * @return the content of the response page.
      * @throws IOException if something goes wrong during the
      *                     connection to the page.
+     * @throws SocketTimeoutException if the page took longer to load than is allowed by {@code timeout_ms}.
      */
-    public static String getWikiHTMLText(URL url, int timeout_ms) throws IOException {
+    public static String getWikiHTMLText(URL url, int timeout_ms) throws IOException, SocketTimeoutException {
         int status;
         // open the connection
         var connection = (HttpURLConnection) url.openConnection();
@@ -72,7 +79,7 @@ public /* static */ class Utility {
      * @return a string of the form {@code "param1=value&param2=value..."}
      * @throws UnsupportedEncodingException if a parameter cannot be encoded properly into UTF-8.
      */
-    private static String buildHttpParamString(Map<String, String> map) throws UnsupportedEncodingException {
+    public static String buildHttpParamString(Map<String, String> map) throws UnsupportedEncodingException {
         var out = new StringBuilder();
         var first = true;
 
@@ -89,6 +96,43 @@ public /* static */ class Utility {
         }
 
         return out.toString();
+    }
+
+    /**
+     * Extracts a set of all URLs on the given page.
+     *
+     * @param pageContent a string containing the HTML source of
+     *                    the page.
+     * @return a set containing all the URLs in the page.
+     * @throws MalformedURLException if any found URL is malformed.
+     */
+    public static Set<String> getAllWikiLinksOnPage(String pageContent) throws MalformedURLException {
+        var dummyURL = new URL("https://www.google.com/");
+        return Jsoup.parse(pageContent).select("a[href]")
+            .stream()
+            .map(e -> e.attr("href"))
+            .filter(e -> e.startsWith("/wiki/"))
+            .filter(e -> !e.contains(":"))
+            .map(e -> "https://en.wikipedia.org" + e)
+            .collect(Collectors.toCollection(HashSet<String>::new)); // only want elements with <a href=""></a> tags
+    }
+
+    /**
+     * Turns a set of links given as strings into a set of URL
+     * objects. If any URL is malformed, it is not added to the
+     * returned set.
+     *
+     * @param links the set of links as Strings.
+     * @return a set of URLs.
+     */
+    public static Set<URL> linkSetToURLSet(Set<String> links) {
+        Set<URL> output = new HashSet<>();
+        for (var link : links) {
+            try {
+                output.add(new URL(link));
+            } catch (MalformedURLException ignored) {}
+        }
+        return output;
     }
 }
 
