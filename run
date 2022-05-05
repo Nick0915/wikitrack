@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+
+# ensure compiled
+echo compiling
+source compile
+
+# run if no compilation errors
+if [ $? -eq 0 ]; then
+    # run output
+    cd out
+    echo running...
+
+    java -cp .:"../libs/jsoup-1.14.3.jar" WikiGame $1 $2
+
+    echo finished.
+    cd ..
+# stop if compilation errors
+else
+    echo compilation failed... not running.
+fi
