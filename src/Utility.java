@@ -143,10 +143,10 @@ public /* static */ class Utility {
      * @throws MalformedURLException if any found URL is malformed.
      */
     public static Set<URL> getLinkedPages(URL page) {
-        if (getAllWikiLinksOnPage_memo.containsKey(page)) {
-            System.out.println("getLinkedPages: cache hit!");
-            return getAllWikiLinksOnPage_memo.get(page);
-        }
+        // if (getAllWikiLinksOnPage_memo.containsKey(page)) {
+        //     System.out.println("getLinkedPages: cache hit!");
+        //     return getAllWikiLinksOnPage_memo.get(page);
+        // }
 
         var pageContent = getHTMLContent(page, 10000);
 
@@ -163,8 +163,10 @@ public /* static */ class Utility {
             .map(e -> linkToURL(e))
             .collect(Collectors.toCollection(HashSet<URL>::new)); // only want elements with <a href=""></a> tags
 
-        getAllWikiLinksOnPage_memo.put(page, linkedPages);
-        return getAllWikiLinksOnPage_memo.get(page);
+        return linkedPages;
+
+        // getAllWikiLinksOnPage_memo.put(page, linkedPages);
+        // return getAllWikiLinksOnPage_memo.get(page);
     }
 }
 

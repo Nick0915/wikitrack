@@ -51,6 +51,9 @@ public class GameCrawler {
 
             // System.out.printf("Processing: %s (queue size: %d)\n", currentUrl, searchQueue.size());
 
+            // if (currentUrl.toString().toLowerCase().contains("transfer")) {
+            //     System.out.println("Potential: " + currentUrl);
+            // }
             if (currentUrl.equals(endUrl)) {
                 break;
             }
