@@ -38,7 +38,7 @@ public class Tester {
     @Test
     public void testKevinBaconWikiHTML() {
         try {
-            var actual = Utility.getWikiHTMLText(Utility.searchToWikiURL("Kevin Bacon"), 2000);
+            var actual = Utility.getHTMLContent(Utility.searchToWikiURL("Kevin Bacon"), 2000);
             var pw = new PrintWriter(new File("../res/actual_kevin_bacon_wiki.html"));
             pw.print(actual.toString());
             pw.close();
@@ -47,18 +47,4 @@ public class Tester {
             assertTrue(false);
         }
     }
-
-    @Test
-    public void testGetAllLinksOnPage() {
-        try {
-            var kevinBaconHTML = Utility.getWikiHTMLText(
-                Utility.searchToWikiURL("Kevin Bacon"), 2000
-            );
-            System.out.println(Utility.getAllWikiLinksOnPage(kevinBaconHTML));
-        } catch (IOException e) {
-            e.printStackTrace();
-            assertTrue(false);
-        }
-    }
 }
-

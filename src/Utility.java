@@ -1,9 +1,5 @@
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Scanner;
-
+import java.util.*;
+import java.util.stream.*;
 import java.net.*;
 import java.io.*;
 
@@ -41,31 +37,48 @@ public /* static */ class Utility {
      *                     connection to the page.
      * @throws SocketTimeoutException if the page took longer to load than is allowed by {@code timeout_ms}.
      */
-    public static String getWikiHTMLText(URL url, int timeout_ms) throws IOException, SocketTimeoutException {
-        int status;
-        // open the connection
-        var connection = (HttpURLConnection) url.openConnection();
-        do {
-            // configure the connection
-            connection.setRequestMethod("GET"); // we want GET request
-            connection.setReadTimeout(timeout_ms); // set timeout
-            connection.setConnectTimeout(timeout_ms);
-            connection.setInstanceFollowRedirects(true); // follow redirects to proper page
+    public static String getHTMLContent(URL url, int timeout_ms) {
+        try {
+            int status;
+            // open the connection
+            var connection = (HttpURLConnection) url.openConnection();
+            do {
+                // configure the connection
+                connection.setRequestMethod("GET"); // we want GET request
+                connection.setReadTimeout(timeout_ms); // set timeout
+                connection.setConnectTimeout(timeout_ms);
+                connection.setInstanceFollowRedirects(true); // follow redirects to proper page
 
-            status = connection.getResponseCode();
-            var loc = connection.getHeaderField("Location");
-            if (loc != null)
-                connection = (HttpURLConnection) new URL(loc).openConnection();
-        } while (status == HttpURLConnection.HTTP_MOVED_PERM || status == HttpURLConnection.HTTP_MOVED_TEMP);
+                status = connection.getResponseCode();
+                var loc = connection.getHeaderField("Location");
+                if (loc != null)
+                    connection = (HttpURLConnection) new URL(loc).openConnection();
+            } while (status == HttpURLConnection.HTTP_MOVED_PERM || status == HttpURLConnection.HTTP_MOVED_TEMP);
 
-        var responseScanner = new Scanner(connection.getInputStream());
-        var output = new StringBuilder();
-        while (responseScanner.hasNextLine()) {
-            output.append(responseScanner.nextLine());
+            var responseScanner = new Scanner(connection.getInputStream());
+            var output = new StringBuilder();
+            while (responseScanner.hasNextLine()) {
+                output.append(responseScanner.nextLine());
+            }
+            responseScanner.close();
+            connection.disconnect();
+            // avoid ddos-ing 0_0
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+            return output.toString();
+        } catch (SocketTimeoutException e) {
+            System.out.println("Server didn't respond fast enough");
+            e.printStackTrace();
+            System.exit(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
         }
-        responseScanner.close();
-        connection.disconnect();
-        return output.toString();
+        return null;
     }
 
     /**
@@ -98,6 +111,29 @@ public /* static */ class Utility {
         return out.toString();
     }
 
+    public static URL linkToURL(String link) {
+        if (linkToURL_memo.containsKey(link)) {
+            // System.out.println("linkToURL: cache hit!");
+            return linkToURL_memo.get(link);
+        }
+        try {
+            linkToURL_memo.put(link, new URL(link));
+            return linkToURL_memo.get(link);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        return null;
+    }
+
+    private static Map<URL, Set<URL>> getAllWikiLinksOnPage_memo;
+    private static Map<String, URL> linkToURL_memo;
+
+    static {
+        getAllWikiLinksOnPage_memo = new HashMap<>(100_000);
+        linkToURL_memo = new HashMap<>(100_000);
+    }
+
     /**
      * Extracts a set of all URLs on the given page.
      *
@@ -106,33 +142,29 @@ public /* static */ class Utility {
      * @return a set containing all the URLs in the page.
      * @throws MalformedURLException if any found URL is malformed.
      */
-    public static Set<String> getAllWikiLinksOnPage(String pageContent) throws MalformedURLException {
-        var dummyURL = new URL("https://www.google.com/");
-        return Jsoup.parse(pageContent).select("a[href]")
+    public static Set<URL> getLinkedPages(URL page) {
+        if (getAllWikiLinksOnPage_memo.containsKey(page)) {
+            System.out.println("getLinkedPages: cache hit!");
+            return getAllWikiLinksOnPage_memo.get(page);
+        }
+
+        var pageContent = getHTMLContent(page, 10000);
+
+        var linkedPages = Jsoup.parse(pageContent).select("a[href]")
             .stream()
             .map(e -> e.attr("href"))
             .filter(e -> e.startsWith("/wiki/"))
             .filter(e -> !e.contains(":"))
             .map(e -> "https://en.wikipedia.org" + e)
-            .collect(Collectors.toCollection(HashSet<String>::new)); // only want elements with <a href=""></a> tags
-    }
+            // .filter(e -> {
+            //     System.out.println("Found valid link: " + e);
+            //     return true;
+            // })
+            .map(e -> linkToURL(e))
+            .collect(Collectors.toCollection(HashSet<URL>::new)); // only want elements with <a href=""></a> tags
 
-    /**
-     * Turns a set of links given as strings into a set of URL
-     * objects. If any URL is malformed, it is not added to the
-     * returned set.
-     *
-     * @param links the set of links as Strings.
-     * @return a set of URLs.
-     */
-    public static Set<URL> linkSetToURLSet(Set<String> links) {
-        Set<URL> output = new HashSet<>();
-        for (var link : links) {
-            try {
-                output.add(new URL(link));
-            } catch (MalformedURLException ignored) {}
-        }
-        return output;
+        getAllWikiLinksOnPage_memo.put(page, linkedPages);
+        return getAllWikiLinksOnPage_memo.get(page);
     }
 }
 

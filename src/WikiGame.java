@@ -13,18 +13,17 @@ public /* static */ class WikiGame {
      * @param args the command line args.
      */
     public static void main(String[] args) {
+        var startPage = "AEX cfiXML";
+        var endPage = "Information Transfer";
+
         try {
-            var kevinBaconHTML = Utility.getWikiHTMLText(
-                Utility.searchToWikiURL("Kevin Bacon"), 10000
+            var crawler = new GameCrawler(
+                Utility.searchToWikiURL(startPage),
+                Utility.searchToWikiURL(endPage)
             );
-            // System.out.println(Utility.getAllLinksOnPage(kevinBaconHTML));
-            for (var link : Utility.linkSetToURLSet(
-                Utility.getAllWikiLinksOnPage(kevinBaconHTML)
-            )) {
-                System.out.println(link);
-                System.out.println();
-            }
-        } catch (IOException e) {
+
+            crawler.crawl();
+        } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
