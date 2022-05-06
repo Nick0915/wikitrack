@@ -13,11 +13,11 @@ public /* static */ class WikiGame {
      * @param args the command line args.
      */
     public static void main(String[] args) {
-        var startPage = "AEX cfiXML";
-        var endPage = "Information Transfer";
+        var startPage = "Information transfer";
+        var endPage = "Information";
 
         try {
-            var crawler = new GameCrawler(
+            var crawler = new BreadthWiseCrawler(
                 Utility.searchToWikiURL(startPage),
                 Utility.searchToWikiURL(endPage)
             );

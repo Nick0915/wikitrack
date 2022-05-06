@@ -1,7 +1,5 @@
 import java.util.*;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 
 /**
@@ -9,35 +7,20 @@ import java.net.URL;
  *
  * @author Nikhil Ivaturi.
  */
-public class GameCrawler {
-    private Set<URL> visitedSites;
-    private Queue<URL> searchQueue;
-    private Map<URL, URL> parentMap;
-
-    private Map<URL, Integer> levels;
-
-    private URL startUrl, endUrl, currentUrl;
+public class BreadthWiseCrawler extends Crawler {
+    // possibly making a child class with multithreading.
+    protected Queue<URL> searchQueue;
 
     /**
-     * Constructs a {@link GameCrawler} with a given start page and end page.
+     * Constructs a {@link BreadthWiseCrawler} with a given start page and end page.
      *
      * @param startUrl the URL to start the search from.
      * @param endUrl the URL to end the search at.
      */
-    public GameCrawler(URL startUrl, URL endUrl) {
-        this.startUrl = startUrl;
-        this.endUrl = endUrl;
-        this.currentUrl = startUrl;
-        this.visitedSites = new HashSet<>();
-        this.searchQueue = new LinkedList<>();
-        this.parentMap = new HashMap<>();
-        this.levels = new HashMap<>();
+    public BreadthWiseCrawler(URL startUrl, URL endUrl) {
+        super(startUrl, endUrl);
+        searchQueue = new LinkedList<>();
         searchQueue.add(startUrl);
-        visitedSites.add(startUrl);
-    }
-
-    private Set<URL> getNeighbors() {
-        return Utility.getLinkedPages(currentUrl);
     }
 
     public void crawl() {
@@ -80,27 +63,29 @@ public class GameCrawler {
             i++;
         }
 
-        // build path
-        System.out.println("FOUND!!!");
-        Stack<URL> path = new Stack<>();
-        path.add(endUrl);
-        while (true) {
-            var parent = parentMap.get(path.peek());
-            path.add(parent);
-            if (parent.equals(startUrl))
-                break;
-        }
+        displayPath();
 
-        // print path
-        boolean first = true;
-        for (var site : path) {
-            if (first) {
-                first = false;
-            } else {
-                System.out.print(" -> ");
-            }
-            System.out.print(site);
-        }
-        System.out.println();
+        // // build path
+        // System.out.println("FOUND!!!");
+        // Stack<URL> path = new Stack<>();
+        // path.add(endUrl);
+        // while (true) {
+        //     var parent = parentMap.get(path.peek());
+        //     path.add(parent);
+        //     if (parent.equals(startUrl))
+        //         break;
+        // }
+
+        // // print path
+        // boolean first = true;
+        // for (var site : path) {
+        //     if (first) {
+        //         first = false;
+        //     } else {
+        //         System.out.print(" -> ");
+        //     }
+        //     System.out.print(site);
+        // }
+        // System.out.println();
     }
 }

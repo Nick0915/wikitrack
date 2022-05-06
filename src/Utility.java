@@ -160,6 +160,7 @@ public /* static */ class Utility {
             //     System.out.println("Found valid link: " + e);
             //     return true;
             // })
+            // .map(String::toLowerCase)
             .map(e -> linkToURL(e))
             .collect(Collectors.toCollection(HashSet<URL>::new)); // only want elements with <a href=""></a> tags
 
