@@ -4,8 +4,6 @@ import java.net.*;
 import java.io.*;
 
 import org.jsoup.*;
-import org.jsoup.nodes.*;
-import org.jsoup.select.*;
 
 /**
  * Utility for the WikiGame application.
@@ -126,11 +124,9 @@ public /* static */ class Utility {
         return null;
     }
 
-    private static Map<URL, Set<URL>> getAllWikiLinksOnPage_memo;
     private static Map<String, URL> linkToURL_memo;
 
     static {
-        getAllWikiLinksOnPage_memo = new HashMap<>(100_000);
         linkToURL_memo = new HashMap<>(100_000);
     }
 
@@ -143,11 +139,6 @@ public /* static */ class Utility {
      * @throws MalformedURLException if any found URL is malformed.
      */
     public static Set<URL> getLinkedPages(URL page) {
-        // if (getAllWikiLinksOnPage_memo.containsKey(page)) {
-        //     System.out.println("getLinkedPages: cache hit!");
-        //     return getAllWikiLinksOnPage_memo.get(page);
-        // }
-
         var pageContent = getHTMLContent(page, 10000);
 
         var linkedPages = Jsoup.parse(pageContent).select("a[href]")
@@ -165,9 +156,6 @@ public /* static */ class Utility {
             .collect(Collectors.toCollection(HashSet<URL>::new)); // only want elements with <a href=""></a> tags
 
         return linkedPages;
-
-        // getAllWikiLinksOnPage_memo.put(page, linkedPages);
-        // return getAllWikiLinksOnPage_memo.get(page);
     }
 }
 

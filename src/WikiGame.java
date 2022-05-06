@@ -1,6 +1,3 @@
-import java.util.Arrays;
-import java.io.IOException;
-
 /**
  * Entry point for the WikiGame Application.
  *
