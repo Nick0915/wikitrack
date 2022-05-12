@@ -11,7 +11,7 @@ public /* static */ class WikiGame {
      */
     public static void main(String[] args) {
         var startPage = "Information transfer";
-        var endPage = "Information";
+        var endPage = "Data exchange";
 
         try {
             var crawler = new BreadthWiseCrawler(
